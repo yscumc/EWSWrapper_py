@@ -74,14 +74,8 @@ class EWSWrapper:
 
 
         #timezone settings
-        if timeArr:
-            self.BaseOffset	 = timeArr[BaseOffset] if BaseOffset in timeArr else self.BaseOffset
-            self.Offset	         = timeArr[Offset] if Offset in timeArr else self.Offset
-            self.DaylightTime    = timeArr[DaylightTime] if DaylightTime in timeArr else self.DaylightTime
-            self.StandardOffset  = timeArr[StandardOffset] if StandardOffset in timeArr else self.StandardOffset
-            self.StandardTime    = timeArr[StandardTime] if StandardTime in timeArr else self.StandardTime
-            self.TimeZoneName    = timeArr[TimeZoneName] if TimeZoneName in timeArr else self.TimeZoneName
-            self.TimeZoneId      = timeArr[TimeZoneId] if TimeZoneId in timeArr else self.TimeZoneId
+        for key, value in timeArr.iteritems():
+            setattr(self, key, value)
 
         authtype = self.transport.authtype
         if authtype == self.transport.NTLM:
