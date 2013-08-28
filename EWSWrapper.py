@@ -190,6 +190,8 @@ class EWSWrapper:
             soapns = 'http://schemas.xmlsoap.org/soap/envelope/'
             tns = 'http://schemas.microsoft.com/exchange/services/2006/types'
             header = ElementTree.fromstring(response).find('{%s}Header' % soapns)
+            if not header:
+                raise Exception('No header in response: %s' % response)
             info = header.find('{%s}ServerVersionInfo' % tns).attrib
             if not info:
                 raise Exception('No versioninfo in response: %s' % response)
