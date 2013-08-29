@@ -763,7 +763,7 @@ class EWSWrapper:
             return self.deleteItems(ids)
 
 
-        def addTask(self, subject, on_behalf, due, body=None, reminderdue=None, reminderStart="30",\
+        def addTask(self, subject, on_behalf=None, due, body=None, reminderdue=None, reminderStart="30",\
                     importance="NORMAL", sensitivity="NORMAL", bodyType="TEXT", category="default"):
             '''======================================
             // Add Task
@@ -1258,10 +1258,11 @@ class EWSWrapper:
                 distinguishedfolderid = Element('t:DistinguishedFolderId')
                 distinguishedfolderid.set('Id', getattr(self.types.EWSType_DistinguishedFolderIdNameType, type))
                 parentfolderids = Element('m:ParentFolderIds')
-                mailbox = Element('t:Mailbox')
-                emailaddress = Element('t:EmailAddress').setText(on_behalf)
-                mailbox.append(emailaddress)
-                distinguishedfolderid.append(mailbox)
+                if on_behalf is not None:
+                    mailbox = Element('t:Mailbox')
+                    emailaddress = Element('t:EmailAddress').setText(on_behalf)
+                    mailbox.append(emailaddress)
+                    distinguishedfolderid.append(mailbox)
                 parentfolderids.append(distinguishedfolderid)
                 finditem.append(parentfolderids)
 
@@ -1345,7 +1346,7 @@ class EWSWrapper:
                         items.append(item)
                 return items
 
-        def listFolders(self, type, on_behalf, shape='DEFAULT_PROPERTIES', depth='SHALLOW'):
+        def listFolders(self, type, on_behalf=None, shape='DEFAULT_PROPERTIES', depth='SHALLOW'):
             '''======================================
             // List Folders
             //======================================
@@ -1378,10 +1379,11 @@ class EWSWrapper:
             distinguishedfolderid = Element('t:DistinguishedFolderId')
             distinguishedfolderid.set('Id', getattr(self.types.EWSType_DistinguishedFolderIdNameType, type))
             parentfolderids = Element('m:ParentFolderIds')
-            mailbox = Element('t:Mailbox')
-            emailaddress = Element('t:EmailAddress').setText(on_behalf)
-            mailbox.append(emailaddress)
-            distinguishedfolderid.append(mailbox)
+            if on_behalf is not None:
+                mailbox = Element('t:Mailbox')
+                emailaddress = Element('t:EmailAddress').setText(on_behalf)
+                mailbox.append(emailaddress)
+                distinguishedfolderid.append(mailbox)
             parentfolderids.append(distinguishedfolderid)
             request.append(parentfolderids)
 
@@ -1476,10 +1478,11 @@ class EWSWrapper:
             distinguishedfolderid = Element('t:DistinguishedFolderId')
             distinguishedfolderid.set('Id', getattr(self.types.EWSType_DistinguishedFolderIdNameType, type))
             parentfolderids = Element('m:SyncFolderId')
-            mailbox = Element('t:Mailbox')
-            emailaddress = Element('t:EmailAddress').setText(on_behalf)
-            mailbox.append(emailaddress)
-            distinguishedfolderid.append(mailbox)
+            if on_behalf is not None:
+                mailbox = Element('t:Mailbox')
+                emailaddress = Element('t:EmailAddress').setText(on_behalf)
+                mailbox.append(emailaddress)
+                distinguishedfolderid.append(mailbox)
             parentfolderids.append(distinguishedfolderid)
             synchfolder.append(parentfolderids)
 
