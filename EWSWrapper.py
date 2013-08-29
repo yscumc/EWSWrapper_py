@@ -763,7 +763,7 @@ class EWSWrapper:
             return self.deleteItems(ids)
 
 
-        def addTask(self, subject, on_behalf=None, due, body=None, reminderdue=None, reminderStart="30",\
+        def addTask(self, subject, on_behalf, due, body=None, reminderdue=None, reminderStart="30",\
                     importance="NORMAL", sensitivity="NORMAL", bodyType="TEXT", category="default"):
             '''======================================
             // Add Task
