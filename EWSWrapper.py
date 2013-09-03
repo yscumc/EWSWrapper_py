@@ -20,6 +20,7 @@
 from suds import WebFault
 from suds.client import Client
 from suds.sax.element import Element
+import suds.sax.text
 from suds.transport.https import WindowsHttpAuthenticated
 from suds.transport.https import HttpAuthenticated
 from suds import cache
@@ -415,7 +416,7 @@ class EWSWrapper:
             path.set('PropertyType', property_type)
             return path
 
-        def listCalendarEvent(self, id=None, start=None, end=None, on_behalf=None, shape='DEFAULT_PROPERTIES', categories=None):
+        def listCalendarEvent(self, id=None, start=None, end=None, on_behalf=None, shape='DEFAULT_PROPERTIES', categories=None, folder_id=None):
             '''======================================
             // List Calendar Events
             //======================================
@@ -428,7 +429,7 @@ class EWSWrapper:
             */
             '''
             type = 'CALENDAR'
-            return self.listItems(type, id, start, end, on_behalf, shape, categories)
+            return self.listItems(type, id, start, end, on_behalf, shape, categories, folder_id=folder_id)
 
         def synchCalendarEvent(self, on_behalf=None, num_to_synch=10, synch_state=None, shape='DEFAULT_PROPERTIES'):
             '''======================================
@@ -1082,7 +1083,7 @@ class EWSWrapper:
 
             return status
 
-        def listItems(self, type, id=None, start=None, end=None, on_behalf=None, shape='ID_ONLY', categories=[], additional=[]):
+        def listItems(self, type, id=None, start=None, end=None, on_behalf=None, shape='ID_ONLY', categories=[], additional=[], folder_id=None):
             '''======================================
             // List Items
             // Note: currenttly only Taska are
@@ -1090,9 +1091,13 @@ class EWSWrapper:
             //======================================
             /* @param string type	- item type
             * @param string id 	- item id. takes precendense over timeframe
-            * @param string $onbehalf 	- "on behalf": item owner email
+            * @param string $onbehalf 	- "on behalf": item owner email, used only if the folder_id parameter is not given
             * @param int $start 	- search start timestamp
             * @param int $end		- search end timestamp
+            * @param string folder_id - The id of the folder to enumerate, used only if the id parameter is not given
+            *         Could be either one of the following:
+            *         1. an instance of suds.sax.text.Text (ie. extracted from Id attribute) of the folder id
+            *         2. a string of the folder id
             *
             * @return object response
             */
@@ -1258,15 +1263,25 @@ class EWSWrapper:
                     else:
                         finditem.append(restriction)
 
-                distinguishedfolderid = Element('t:DistinguishedFolderId')
-                distinguishedfolderid.set('Id', getattr(self.types.EWSType_DistinguishedFolderIdNameType, type))
                 parentfolderids = Element('m:ParentFolderIds')
-                if on_behalf is not None:
-                    mailbox = Element('t:Mailbox')
-                    emailaddress = Element('t:EmailAddress').setText(on_behalf)
-                    mailbox.append(emailaddress)
-                    distinguishedfolderid.append(mailbox)
-                parentfolderids.append(distinguishedfolderid)
+                # Use DistinguishedFolderId if an exact folder_id is not given
+                if folder_id is None:
+                    distinguishedfolderid = Element('t:DistinguishedFolderId')
+                    distinguishedfolderid.set('Id', getattr(self.types.EWSType_DistinguishedFolderIdNameType, type))
+                    if on_behalf is not None:
+                        mailbox = Element('t:Mailbox')
+                        emailaddress = Element('t:EmailAddress').setText(on_behalf)
+                        mailbox.append(emailaddress)
+                        distinguishedfolderid.append(mailbox)
+                    parentfolderids.append(distinguishedfolderid)
+                # If the folder_id is given use it instead
+                elif isinstance(folder_id, (suds.sax.text.Text, str)):
+                    folderid = Element('t:FolderId')
+                    folderid.set('Id', folder_id)
+                    parentfolderids.append(folderid)
+                # Unknown type
+                else:
+                    raise ValueError("Expected type suds.sax.text.Text or str: %s" % folder_id)
                 finditem.append(parentfolderids)
 
                 xml = self.exchange.transport.wrap(finditem)
