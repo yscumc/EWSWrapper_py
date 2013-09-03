@@ -136,6 +136,7 @@ class EWSWrapper:
                     '0': ('Exchange2010','Microsoft Exchange Server 2010'),\
                     '1': ('Exchange2010_SP1','Microsoft Exchange Server 2010 SP1'),\
                     '2': ('Exchange2010_SP2','Microsoft Exchange Server 2010 SP2'),\
+                    '3': ('Exchange2010_SP2','Microsoft Exchange Server 2010 SP2'), \
                     '16': ('Exchange2010_SP2','Microsoft Exchange Server 2010 SP2') \
                     }\
             }
