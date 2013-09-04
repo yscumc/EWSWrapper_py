@@ -1138,7 +1138,7 @@ class EWSWrapper:
                         rspcode = el.ResponseCode
                         if rspclass == 'Error':
                             raise Exception('Error code: %s message: %s' % \
-                                            (rspcode, msg.MessageText))
+                                            (rspcode, el.MessageText))
                         if rspclass != 'Success':
                             raise Exception('Unknown response class: %s code: %s' % \
                                             (rspclass, rspcode))
