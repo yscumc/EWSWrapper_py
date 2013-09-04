@@ -1661,7 +1661,13 @@ class EWSDateTime(datetime):
         return self - timedelta(seconds=1)
 
     def __new__(cls, y=None, m=None, d=None, h=None, mi=None, s=None):
-        if((y>=0) and (all(x is None for x in (m,d,h,mi,s)))):
+        # If it's a naive datetime, just use it
+        if(isinstance(y, datetime) and (all(x is None for x in (m,d,h,mi,s)))):
+            if y.tzinfo is not None:
+                raise NotImplementedError("Aware datetime objects are not supported")
+                # TODO: Implement conversion to local time? Or change ewsformat to be tz aware
+            return super(EWSDateTime, cls).__new__(cls,y.year,y.month,y.day,y.hour,y.minute,y.second)
+        elif((y>=0) and (all(x is None for x in (m,d,h,mi,s)))):
             t = datetime.fromtimestamp(y)
             return super(EWSDateTime, cls).__new__(cls,t.year,t.month,t.day,t.hour,t.minute,t.second)
         else:
