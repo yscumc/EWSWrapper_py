@@ -415,6 +415,26 @@ class EWSWrapper:
             path.set('PropertyId', property_id)
             path.set('PropertyType', property_type)
             return path
+        
+        def _distinguished_or_folder_id(self, distinguished_type, on_behalf=None, folder_id=None):
+            # Use DistinguishedFolderId if an exact folder_id is not given
+            if folder_id is None:
+                distinguishedfolderid = Element('t:DistinguishedFolderId')
+                distinguishedfolderid.set('Id', distinguished_type)
+                if on_behalf is not None:
+                    mailbox = Element('t:Mailbox')
+                    emailaddress = Element('t:EmailAddress').setText(on_behalf)
+                    mailbox.append(emailaddress)
+                    distinguishedfolderid.append(mailbox)
+                return distinguishedfolderid
+            # If the folder_id is given use it instead
+            elif isinstance(folder_id, (suds.sax.text.Text, str)):
+                folderid = Element('t:FolderId')
+                folderid.set('Id', folder_id)
+                return folderid
+            # Unknown type
+            else:
+                raise ValueError("Expected type suds.sax.text.Text or str for folder_id: %s" % folder_id)
 
         def listCalendarEvent(self, id=None, start=None, end=None, on_behalf=None, shape='DEFAULT_PROPERTIES', categories=None, folder_id=None):
             '''======================================
@@ -450,7 +470,7 @@ class EWSWrapper:
 
 
         def addCalendarEvent(self, subject, body, start, end, attendees, on_behalf=None, \
-                             location=None, allday = False, bodyType="TEXT", category="default"):
+                             location=None, allday = False, bodyType="TEXT", category="default", folder_id=None):
             '''=====================================
             // Add Calendar Event
             //======================================
@@ -473,14 +493,11 @@ class EWSWrapper:
             createitem.set('SendMeetingInvitations', self.types.EWSType_CalendarItemCreateOrDeleteOperationType.SEND_TO_NONE)
 
             saveditemfolderid = Element('m:SavedItemFolderId')
-            distinguishedfolderid = Element('t:DistinguishedFolderId')
-            distinguishedfolderid.set('Id', self.types.EWSType_DistinguishedFolderIdNameType.CALENDAR)
-            if on_behalf is not None:
-                mailbox = Element('t:Mailbox')
-                emailaddress = Element('t:EmailAddress').setText(on_behalf)
-                mailbox.append(emailaddress)
-                distinguishedfolderid.append(mailbox)
-            saveditemfolderid.append(distinguishedfolderid)
+            folder = self._distinguished_or_folder_id(self.types.EWSType_DistinguishedFolderIdNameType.CALENDAR,
+                                                      on_behalf,
+                                                      folder_id,
+                                                      )
+            saveditemfolderid.append(folder)
             createitem.append(saveditemfolderid)
 
             calitems = Element('m:Items')
@@ -1264,24 +1281,11 @@ class EWSWrapper:
                         finditem.append(restriction)
 
                 parentfolderids = Element('m:ParentFolderIds')
-                # Use DistinguishedFolderId if an exact folder_id is not given
-                if folder_id is None:
-                    distinguishedfolderid = Element('t:DistinguishedFolderId')
-                    distinguishedfolderid.set('Id', getattr(self.types.EWSType_DistinguishedFolderIdNameType, type))
-                    if on_behalf is not None:
-                        mailbox = Element('t:Mailbox')
-                        emailaddress = Element('t:EmailAddress').setText(on_behalf)
-                        mailbox.append(emailaddress)
-                        distinguishedfolderid.append(mailbox)
-                    parentfolderids.append(distinguishedfolderid)
-                # If the folder_id is given use it instead
-                elif isinstance(folder_id, (suds.sax.text.Text, str)):
-                    folderid = Element('t:FolderId')
-                    folderid.set('Id', folder_id)
-                    parentfolderids.append(folderid)
-                # Unknown type
-                else:
-                    raise ValueError("Expected type suds.sax.text.Text or str: %s" % folder_id)
+                folder = self._distinguished_or_folder_id(self.types.EWSType_DistinguishedFolderIdNameType.CALENDAR,
+                                                          on_behalf,
+                                                          folder_id,
+                                                          )
+                parentfolderids.append(folder)
                 finditem.append(parentfolderids)
 
                 xml = self.exchange.transport.wrap(finditem)
