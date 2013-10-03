@@ -469,7 +469,7 @@ class EWSWrapper:
             return self.synchFolder(type, on_behalf, num_to_synch, synch_state, shape)
 
 
-        def addCalendarEvent(self, subject, body, start, end, attendees, on_behalf=None, \
+        def addCalendarEvent(self, subject, body, start, end, attendees=[], on_behalf=None, \
                              location=None, allday = False, bodyType="TEXT", category="default", folder_id=None):
             '''=====================================
             // Add Calendar Event
@@ -547,15 +547,16 @@ class EWSWrapper:
             calitem.append(alldayevent.setText(int(allday)))
             if location:
                 calitem.append(Location.setText(location))
-            atts = Element('t:RequiredAttendees')
-            for attendee in attendees:
-                att = Element('t:Attendee')
-                mailbox = Element('t:Mailbox')
-                emailaddress = Element('t:EmailAddress').setText(attendee)
-                mailbox.append(emailaddress)
-                att.append(mailbox)
-                atts.append(att)
-            calitem.append(atts)
+            if attendees:
+                atts = Element('t:RequiredAttendees')
+                for attendee in attendees:
+                    att = Element('t:Attendee')
+                    mailbox = Element('t:Mailbox')
+                    emailaddress = Element('t:EmailAddress').setText(attendee)
+                    mailbox.append(emailaddress)
+                    att.append(mailbox)
+                    atts.append(att)
+                calitem.append(atts)
             #TZ realted stuff
             if startTZ is not None:
                 calitem.append(startTZ)
