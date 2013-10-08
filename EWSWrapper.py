@@ -1027,7 +1027,7 @@ class EWSWrapper:
             return self.listItems(type, id, start, end, on_behalf, shape, categories)
 
 
-        def deleteItems(self, ids):
+        def deleteItems(self, ids, delete_mode=None):
             '''======================================
             // Delete Items
             //======================================
@@ -1043,7 +1043,15 @@ class EWSWrapper:
                 return status
 
             deleteitem = Element('m:DeleteItem')
-            deleteitem.set('DeleteType', self.types.EWSType_DisposalType.MOVE_TO_DELETED_ITEMS)
+            # By default, we will use SoftDelete on Exchange 2010,
+            #  which seems to be more reliable if the user has no permissions
+            #  to the deleted items folder
+            # See Remarks at http://msdn.microsoft.com/en-us/library/aa562961%28v=exchg.140%29.aspx
+            if delete_mode is None:
+                delete_mode = self.types.EWSType_DisposalType.SOFT_DELETE \
+                    if int(self.exchange.version.majorversion) >= 14 \
+                    else self.types.EWSType_DisposalType.MOVE_TO_DELETED_ITEMS
+            deleteitem.set('DeleteType', delete_mode)
             deleteitem.set('SendMeetingCancellations', self.types.EWSType_CalendarItemCreateOrDeleteOperationType.SEND_TO_NONE)
             deleteitem.set('AffectedTaskOccurrences', self.types.EWSType_AffectedTaskOccurrencesType.ALL_OCCURRENCES)
 
