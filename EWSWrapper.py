@@ -47,7 +47,7 @@ class EWSWrapper:
     #for pagination purposes (search / sync)
 
     def __init__(self, host, username, password, datadir='wsdl', protocol='https', \
-                 authtype=None, debug=False, timeArr=[]):
+                 authtype=None, debug=False, timeArr=[], cachepath=None):
 
         self.host = host
         self.protocol = protocol
@@ -70,7 +70,8 @@ class EWSWrapper:
             tmp_basepath = self.basepath
         localwsdl = 'file:///%s/services.wsdl' % (tmp_basepath)
         #cache path
-        cachepath = basepath.replace('\\', '/') + '/suds_cache'
+        if not cachepath:
+            cachepath = basepath.replace('\\', '/') + '/suds_cache'
 
 
         #timezone settings
