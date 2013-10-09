@@ -61,9 +61,15 @@ class EWSWrapper:
 
         # Download and fix up the WSDL
         #localwsdl = 'file://%s' % self.setup()
-        basepath = ''
-        basepath = path.normpath(path.dirname( path.realpath( __file__ )))
-        self.basepath = basepath.replace('\\', '/') + '/' + datadir
+        # Rough fix. Will not work if \ is in linux path (which is valid)
+        if '/' in datadir or '\\' in datadir:
+            datadir.replace('\\', '/')
+            basepath = path.split(datadir)[0]
+            self.basepath = datadir
+        else:
+            basepath = ''
+            basepath = path.normpath(path.dirname( path.realpath( __file__ )))
+            self.basepath = basepath.replace('\\', '/') + '/' + datadir
         if self.basepath.startswith('/'):
             tmp_basepath = self.basepath[1:]
         else:
