@@ -63,7 +63,7 @@ class EWSWrapper:
         #localwsdl = 'file://%s' % self.setup()
         # Rough fix. Will not work if \ is in linux path (which is valid)
         if '/' in datadir or '\\' in datadir:
-            datadir.replace('\\', '/')
+            datadir = datadir.replace('\\', '/')
             basepath = path.split(datadir)[0]
             self.basepath = datadir
         else:
