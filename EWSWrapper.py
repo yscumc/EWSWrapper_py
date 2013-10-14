@@ -1343,6 +1343,7 @@ class EWSWrapper:
                 if type=="CALENDAR":
                     additional.append("calendar:RequiredAttendees")
                     additional.append("calendar:IsAllDayEvent")
+                    additional.append("calendar:LegacyFreeBusyStatus")
                     additional.append("calendar:Duration")
                     additional.append("item:Categories")
                     additional.append("item:Body")
@@ -1354,6 +1355,7 @@ class EWSWrapper:
                     #exit()
                     extended_add, extended_fday, extended_cats, extended_body = ({} for i in range(4))
                     extended_sen, extended_imp = ({} for i in range(2))
+                    extended_lfbs = {}
                     for i in range(0, len(extended_items)):
                         if hasattr(extended_items[i], 'RequiredAttendees'):
                             extended_add[extended_items[i].ItemId._Id] = extended_items[i].RequiredAttendees
@@ -1364,6 +1366,7 @@ class EWSWrapper:
                         extended_body[extended_items[i].ItemId._Id] = extended_items[i].Body if hasattr(extended_items[i], "Body") else None
                         extended_sen[extended_items[i].ItemId._Id] = extended_items[i].Sensitivity
                         extended_imp[extended_items[i].ItemId._Id] = extended_items[i].Importance
+                        extended_lfbs[extended_items[i].ItemId._Id] = extended_items[i].LegacyFreeBusyStatus
                     for i in range(0,len(fullitems)):
                         fullitems[i].RequiredAttendees = extended_add.get(fullitems[i].ItemId._Id)
                         fullitems[i].IsAllDayEvent = extended_fday.get(fullitems[i].ItemId._Id)
@@ -1371,6 +1374,7 @@ class EWSWrapper:
                         fullitems[i].Body = extended_body.get(fullitems[i].ItemId._Id)
                         fullitems[i].Sensitivity = extended_sen.get(fullitems[i].ItemId._Id)
                         fullitems[i].Importance = extended_imp.get(fullitems[i].ItemId._Id)
+                        fullitems[i].LegacyFreeBusyStatus = extended_lfbs.get(fullitems[i].ItemId._Id)
 
                 if not categories:
                     return fullitems
