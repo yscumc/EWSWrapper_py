@@ -429,7 +429,7 @@ class EWSWrapper:
                     distinguishedfolderid.append(mailbox)
                 return distinguishedfolderid
             # If the folder_id is given use it instead
-            elif isinstance(folder_id, (suds.sax.text.Text, str)):
+            elif isinstance(folder_id, (suds.sax.text.Text, basestring)):
                 folderid = Element('t:FolderId')
                 folderid.set('Id', folder_id)
                 return folderid
