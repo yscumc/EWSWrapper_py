@@ -437,7 +437,8 @@ class EWSWrapper:
             else:
                 raise ValueError("Expected type suds.sax.text.Text or str for folder_id: %s" % folder_id)
 
-        def listCalendarEvent(self, id=None, start=None, end=None, on_behalf=None, shape='DEFAULT_PROPERTIES', categories=None, folder_id=None):
+        def listCalendarEvent(self, id=None, start=None, end=None, on_behalf=None, shape='DEFAULT_PROPERTIES',
+                              categories=None, folder_id=None, body_type=None):
             '''======================================
             // List Calendar Events
             //======================================
@@ -450,7 +451,8 @@ class EWSWrapper:
             */
             '''
             type = 'CALENDAR'
-            return self.listItems(type, id, start, end, on_behalf, shape, categories, folder_id=folder_id)
+            return self.listItems(type, id, start, end, on_behalf, shape, categories, folder_id=folder_id,
+                                  body_type=body_type)
 
         def synchCalendarEvent(self, on_behalf=None, num_to_synch=10, synch_state=None, shape='DEFAULT_PROPERTIES'):
             '''======================================
@@ -1110,7 +1112,8 @@ class EWSWrapper:
 
             return status
 
-        def listItems(self, type, id=None, start=None, end=None, on_behalf=None, shape='ID_ONLY', categories=[], additional=[], folder_id=None):
+        def listItems(self, type, id=None, start=None, end=None, on_behalf=None, shape='ID_ONLY', categories=[],
+                      additional=[], folder_id=None, body_type=None):
             '''======================================
             // List Items
             // Note: currenttly only Taska are
@@ -1125,6 +1128,7 @@ class EWSWrapper:
             *         Could be either one of the following:
             *         1. an instance of suds.sax.text.Text (ie. extracted from Id attribute) of the folder id
             *         2. a string of the folder id
+            * @param string body_type - One of EWSType.EWSType_BodyTypeResponseType, used only if id is given
             *
             * @return object response
             */
@@ -1135,6 +1139,9 @@ class EWSWrapper:
                 itemshape = Element('m:ItemShape')
                 baseshape = Element('t:BaseShape').setText(getattr(self.types.EWSType_DefaultShapeNamesType, shape))
                 itemshape.append(baseshape)
+                if body_type is not None:
+                    bodytype = Element('t:BodyType').setText(body_type)
+                    itemshape.append(bodytype)
 
                 if additional:
                     additionalproperties = Element('t:AdditionalProperties')
@@ -1341,7 +1348,7 @@ class EWSWrapper:
                     additional.append("item:Body")
                     additional.append("item:Sensitivity")
                     additional.append("item:Importance")
-                    extended_items = self.listItems(type="CALENDAR", id=ids, additional=additional)
+                    extended_items = self.listItems(type="CALENDAR", id=ids, additional=additional, body_type=body_type)
                     #print extended_items
                     #print ids
                     #exit()
